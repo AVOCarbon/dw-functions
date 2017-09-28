@@ -188,7 +188,9 @@ ELSE (("Receptions_with_exchangerate_AC"."Ref_price_EUR" / "Receptions_with_exch
 END AS "Variance_value@refprice_CUR",
 "Receptions_with_exchangerate_AC"."Purchasing_currency",
 "Receptions_with_exchangerate_AC"."Movement_date"
+-- update 28/09/17 : adding the condition below to remove where it is coming from a warehouse, TR and else
 FROM "Receptions_with_exchangerate_AC"
+WHERE "Receptions_with_exchangerate_AC"."Supplier_code" NOT IN ('WH', 'TR','PR', 'PL')	
 )
 
 SELECT *, 
@@ -196,8 +198,7 @@ CASE WHEN Round("Receptions_final"."Movement_value_CUR",0)=Round("Receptions_fin
 Else -1::smallint
 End AS "Price_change"
 FROM "Receptions_final"
--- update 28/09/17 : adding the condition below to remove where it is coming from a warehouse
-WHERE Supplier_code != 'WH';
+;
 
 END
 $BODY$
