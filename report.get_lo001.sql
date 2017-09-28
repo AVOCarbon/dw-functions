@@ -195,7 +195,9 @@ SELECT *,
 CASE WHEN Round("Receptions_final"."Movement_value_CUR",0)=Round("Receptions_final"."Variance_value@refprice_CUR",0) THEN 0::smallint
 Else -1::smallint
 End AS "Price_change"
-FROM "Receptions_final";
+FROM "Receptions_final"
+-- update 28/09/17 : adding the condition below to remove where it is coming from a warehouse
+WHERE Supplier_code != 'WH';
 
 END
 $BODY$
