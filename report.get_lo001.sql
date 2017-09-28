@@ -54,7 +54,9 @@ ON "LO-D4_Movements"."Internal_reference" =LOD4_MaxDate."Internal_reference" AND
 INNER JOIN dw."T13_RefSupplier" ON "LO-D4_Movements".from_code::text = "T13_RefSupplier"."Supplier_code"::text AND "LO-D4_Movements"."Site"::text = "T13_RefSupplier"."Site"::text AND "LO-D4_Movements"."Internal_reference"::text = "T13_RefSupplier"."Internal_reference"::text
 GROUP BY "LO-D4_Movements"."Internal_reference", "LO-D4_Movements"."Movement_date", "LO-D4_Movements"."Site"
 ),
-
+-- update 28/09/17
+-- change INNER JOIN dw."T13_RefSupplier to 
+-- a LEFT JOIN dw."T13_RefSupplier 
 
 "Receptions_over_period" AS (
 SELECT "Movement_over_period".*,
@@ -65,7 +67,7 @@ ELSE "Ref_price"."Ref_value"/"Ref_price"."Ref_quantity"
 END AS "Ref_price",
 "T13_RefSupplier"."Purchasing_currency"
 FROM "Movement_over_period"
-INNER JOIN dw."T13_RefSupplier" ON "Movement_over_period".from_code::text = "T13_RefSupplier"."Supplier_code"::text AND "Movement_over_period"."Site"::text = "T13_RefSupplier"."Site"::text AND "Movement_over_period"."Internal_reference"::text = "T13_RefSupplier"."Internal_reference"::text
+LEFT JOIN dw."T13_RefSupplier" ON "Movement_over_period".from_code::text = "T13_RefSupplier"."Supplier_code"::text AND "Movement_over_period"."Site"::text = "T13_RefSupplier"."Site"::text AND "Movement_over_period"."Internal_reference"::text = "T13_RefSupplier"."Internal_reference"::text
 LEFT JOIN "Ref_price" ON "Movement_over_period"."Site"::text = "Ref_price"."Site"::text AND "Movement_over_period"."Internal_reference"::text = "Ref_price"."Internal_reference"::text
 ),
 
