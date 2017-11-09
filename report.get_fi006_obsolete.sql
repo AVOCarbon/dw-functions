@@ -3,26 +3,8 @@
 -- DROP FUNCTION report.get_fi006_obsolete(timestamp without time zone, timestamp without time zone, integer);
 
 CREATE OR REPLACE FUNCTION report.get_fi006_obsolete(IN "date_D" timestamp without time zone, IN "date_F" timestamp without time zone, IN frequence integer)
-  RETURNS TABLE("Period_date" timestamp without time zone, 
-  				"Site" character varying, 
-  				"Internal_reference" character varying, 
-  				"Inventory_quantity" numeric, "
-  				Inventory_location" character, 
-  				"Inventory_unitprice" numeric, 
-  				"Inventory_value_gross_CUR" numeric, 
-  				"Inventory_value_gross_EUR" numeric, 
-  				"Inventory_value_net_CUR" numeric, 
-  				"Inventory_value_net_EUR" numeric, 
-  				"Inventory_obsolete" character varying, 
-  				"Inventory_lastmovement" timestamp without time zone, 
-  				"Inventory_dateOBS" timestamp without time zone, 
-  				"Inventory_M" integer, 
-  				"Inventory_M+1" integer, 
-  				"Inventory_M+2" integer, 
-  				"Inventory_M+3" integer, 
-  				"Inventory_M+4" integer, 
-  				"Inventory_M+5" integer, 
-  				"Inventory_ForecastOBS" integer) AS
+  RETURNS TABLE("Period_date" timestamp without time zone, "Site" character varying, "Internal_reference" character varying, "Inventory_quantity" numeric, "
+  				Inventory_location" character, "Inventory_unitprice" numeric, "Inventory_value_gross_CUR" numeric, "Inventory_value_gross_EUR" numeric, "Inventory_value_net_CUR" numeric, "Inventory_value_net_EUR" numeric, "Inventory_obsolete" character varying, "Inventory_lastmovement" timestamp without time zone, "Inventory_dateOBS" timestamp without time zone, "Inventory_M" integer, "Inventory_M+1" integer, "Inventory_M+2" integer, "Inventory_M+3" integer, "Inventory_M+4" integer, "Inventory_M+5" integer, "Inventory_ForecastOBS" integer) AS
 $BODY$
 
 BEGIN
@@ -35,18 +17,18 @@ WITH
 -- adding all columns by name instead of by a *
 
 "Inventory" AS (
-	SELECT "Period_date",
-			"Site",
-			"Internal_reference",
-			"Inventory_quantity",
-			"Inventory_location",
-			"Inventory_unitprice",
-			"Inventory_value_gross_CUR",
-			"Inventory_value_gross_EUR",
-			"Inventory_value_net_CUR",
-			"Inventory_value_net_EUR",
-			"Inventory_obsolete",
-			"Inventory_lastmovement"
+	SELECT get_fi006."Period_date",
+			get_fi006."Site",
+			get_fi006."Internal_reference",
+			get_fi006."Inventory_quantity",
+			get_fi006."Inventory_location",
+			get_fi006."Inventory_unitprice",
+			get_fi006."Inventory_value_gross_CUR",
+			get_fi006."Inventory_value_gross_EUR",
+			get_fi006."Inventory_value_net_CUR",
+			get_fi006."Inventory_value_net_EUR",
+			get_fi006."Inventory_obsolete",
+			get_fi006."Inventory_lastmovement"
 	FROM report.get_fi006("date_D","date_F", frequence)
 ),
 
