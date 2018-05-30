@@ -2,7 +2,10 @@
 
 -- DROP FUNCTION report.get_lo001(timestamp without time zone, timestamp without time zone, integer);
 
-CREATE OR REPLACE FUNCTION report.get_lo001(IN "date_D" timestamp without time zone, IN "date_F" timestamp without time zone, IN frequence integer)
+CREATE OR REPLACE FUNCTION report.get_lo001(
+    IN "date_D" timestamp without time zone,
+    IN "date_F" timestamp without time zone,
+    IN frequence integer)
   RETURNS TABLE("Period_date" timestamp without time zone, "Site" character varying, "Supplier_code" character varying, "Internal_reference" character varying, "Shipment_number" character varying, "PO_number" character varying, "Quantity" numeric, "Movement_value_EUR" numeric, "Movement_value_CUR" numeric, "Reception_price_EUR" numeric, "Reception_price_CUR" numeric, "Variance_refprice_EUR" numeric, "Variance_refprice_CUR" numeric, "Variance_value@refprice_EUR" numeric, "Variance_value@refprice_CUR" numeric, "Purchasing_currency" character varying, "Movement_date" timestamp without time zone, "Price_change" smallint) AS
 $BODY$
 DECLARE p_debut timestamp without time zone;
@@ -88,16 +91,15 @@ JOIN dw."C00_Sites" ON "Receptions_over_period"."Site"::text = "C00_Sites"."Site
 "Receptions_with_exchangerate_MC" AS (
 SELECT 
 "Receptions_with_currency".*,
-COALESCE(exA."ratePerEur", exA_last."ratePerEur_Last")::numeric(15,4) AS "ratePerEur_A"
+exA."ratePerEur"::numeric(15,4) AS "ratePerEur_A" -- removing to COALESCE and the col exA_last."ratePerEur_Last as the table "FI-D0_ExchangeRates_LAST" do not exist
 FROM "Receptions_with_currency"
-
 LEFT JOIN dw."FI-D0_ExchangeRates" AS exA
-ON exA."rateType" ='A'
+ON exA."rateType" ='E' -- 29/05/18 : change to E instead of A
 AND "Receptions_with_currency"."Movement_currency" = exA."rateCurrency" 
 AND "Receptions_with_currency"."eom_date" = exA."rateDate"
-LEFT JOIN dw."FI-D0_ExchangeRates_LAST" AS exA_last
-ON "Receptions_with_currency"."Movement_currency" = exA_last.rate_cur 
-AND exA_last."rate_type" = 'A'
+-- LEFT JOIN dw."FI-D0_ExchangeRates_LAST" AS exA_last  -- 29/05/18 : put into comments as the table FI-D0_ExchangeRates_LAST does not exist
+-- ON "Receptions_with_currency"."Movement_currency" = exA_last.rate_cur 
+-- AND exA_last."rate_type" = 'A'
 
 ),
 
@@ -127,22 +129,24 @@ ELSE ("Receptions_with_exchangerate_MC"."Ref_price" / "Receptions_with_exchanger
 END AS "Ref_price_EUR",
 "Receptions_with_exchangerate_MC"."Accounting_currency",
 "Receptions_with_exchangerate_MC"."Purchasing_currency",
-"Receptions_with_exchangerate_MC"."Movement_date"
+"Receptions_with_exchangerate_MC"."Movement_date",
+"Receptions_with_exchangerate_MC"."ratePerEur_A" --29/05/18
 FROM "Receptions_with_exchangerate_MC"
 ),
 
 "Receptions_with_exchangerate_AC" AS (
 SELECT 
-"Receptions_EUR".*,
-COALESCE(exA."ratePerEur", exA_last."ratePerEur_Last")::numeric(15,4) AS "ratePerEur_A"
+"Receptions_EUR".*
+--,
+-- exA."ratePerEur"::numeric(15,4) AS "ratePerEur_A" -- 29/05/18 : removing COALESCE and exA_last."ratePerEur_Last")
 FROM "Receptions_EUR"
 LEFT JOIN dw."FI-D0_ExchangeRates" AS exA
-ON exA."rateType" ='A'
+ON exA."rateType" ='E' -- 29/08/18 : changing to E instead of A
 AND "Receptions_EUR"."Accounting_currency" = exA."rateCurrency" 
 AND "Receptions_EUR"."eom_date" = exA."rateDate"
-LEFT JOIN dw."FI-D0_ExchangeRates_LAST" AS exA_last
-ON "Receptions_EUR"."Accounting_currency" = exA_last.rate_cur 
-AND exA_last."rate_type" = 'A'
+-- LEFT JOIN dw."FI-D0_ExchangeRates_LAST" AS exA_last -- 29/05/18 removing the join with FI-D0_ExchangeRates_LAST as the table no longer exist
+-- ON "Receptions_EUR"."Accounting_currency" = exA_last.rate_cur 
+-- AND exA_last."rate_type" = 'A'
 
 ),
 
@@ -188,17 +192,16 @@ ELSE (("Receptions_with_exchangerate_AC"."Ref_price_EUR" / "Receptions_with_exch
 END AS "Variance_value@refprice_CUR",
 "Receptions_with_exchangerate_AC"."Purchasing_currency",
 "Receptions_with_exchangerate_AC"."Movement_date"
--- update 28/09/17 : adding the condition below to remove where it is coming from a warehouse, TR and else
 FROM "Receptions_with_exchangerate_AC"
-WHERE "Receptions_with_exchangerate_AC"."Supplier_code" NOT IN ('WH', 'TR','PR', 'PL')	
+WHERE "Receptions_with_exchangerate_AC"."Supplier_code" NOT IN ('WH', 'TR','PR', 'PL')
 )
 
 SELECT *, 
 CASE WHEN Round("Receptions_final"."Movement_value_CUR",0)=Round("Receptions_final"."Variance_value@refprice_CUR",0) THEN 0::smallint
 Else -1::smallint
 End AS "Price_change"
-FROM "Receptions_final"
-;
+FROM "Receptions_final";
+
 
 END
 $BODY$
