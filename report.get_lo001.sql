@@ -1,5 +1,14 @@
 -- Function: report.get_lo001(timestamp without time zone, timestamp without time zone, integer)
 
+-- 30/05/18
+-- exA."rateType" ='E', E means End of month
+-- I commented the JOIN with the table FI-D0_ExchangeRates_LAST on 
+-- the subquery, Receptions_with_exchangerate_MC and Receptions_with_exchangerate_AC.
+-- I've also added "Receptions_with_exchangerate_MC"."ratePerEur_A" on Receptions_EUR
+-- This fix amended the issue raised by OG where Movement_value_CUR was not appearing for some items 
+-- that we are receiving from the supplier
+
+
 -- DROP FUNCTION report.get_lo001(timestamp without time zone, timestamp without time zone, integer);
 
 CREATE OR REPLACE FUNCTION report.get_lo001(
